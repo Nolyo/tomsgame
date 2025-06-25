@@ -43,6 +43,8 @@
             border-radius: 10px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             background: #1a1a2e;
+            max-width: 100%;
+            height: auto;
         }
 
         .controls {
@@ -241,6 +243,37 @@
             color: #ffd700;
             font-weight: bold;
         }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .game-container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .score {
+                font-size: 16px;
+            }
+            .sound-toggle, .menu-button {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            .menu-button {
+                right: 60px;
+            }
+            .power-up-legend {
+                display: none; /* On le cache sur mobile pour l'instant */
+            }
+            .active-powerups {
+                bottom: 10px;
+                left: 10px;
+                font-size: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -307,9 +340,32 @@
         // Variables du jeu
         let score = 0;
         let lives = 3;
+        let gamePaused = false;
+        let gameOver = false;
+        let soundEnabled = true;
         let combo = 0;
         let gameRunning = true;
-        let soundEnabled = true;
+
+        const keys = {};
+
+        function updatePaddlePosition(x) {
+            let rect = canvas.getBoundingClientRect();
+            paddle.x = x - rect.left;
+            if (paddle.x < 0) paddle.x = 0;
+            if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+        }
+
+        document.addEventListener('keydown', (e) => keys[e.code] = true);
+        document.addEventListener('keyup', (e) => keys[e.code] = false);
+        document.addEventListener('mousemove', (e) => updatePaddlePosition(e.clientX));
+        canvas.addEventListener('touchstart', (e) => {
+            updatePaddlePosition(e.touches[0].clientX);
+            e.preventDefault();
+        }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => {
+            updatePaddlePosition(e.touches[0].clientX);
+            e.preventDefault();
+        }, { passive: false });
 
         // Système audio
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -374,18 +430,9 @@
             }
         }
 
-        // Contrôles
-        const keys = {};
-        
-        document.addEventListener('keydown', (e) => {
-            keys[e.code] = true;
-        });
-        
-        document.addEventListener('keyup', (e) => {
-            keys[e.code] = false;
-        });
-
         // Fonctions audio
+        let soundMuted = false;
+        
         function playSound(frequency, duration, type = 'sine') {
             if (!soundEnabled) return;
             

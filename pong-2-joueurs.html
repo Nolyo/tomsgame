@@ -66,6 +66,8 @@
                 0 0 20px rgba(0, 255, 136, 0.3),
                 inset 0 0 20px rgba(0, 255, 136, 0.1);
             background: #0a0a1a;
+            max-width: 100%;
+            height: auto;
         }
 
         .controls {
@@ -226,6 +228,42 @@
         .glow {
             animation: glow 1s infinite;
         }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .game-container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .score-container {
+                padding: 0 10px;
+            }
+            .player-score {
+                font-size: 16px;
+            }
+            .player-score div:last-child {
+                font-size: 28px;
+            }
+            .vs {
+                font-size: 16px;
+            }
+            .controls {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .sound-toggle, .menu-button {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            .menu-button {
+                right: 70px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -291,7 +329,7 @@
         let gameRunning = false;
         let soundEnabled = true;
         let gameStarted = false;
-        const winningScore = 7;
+        const winningScore = 10;
 
         // Système audio
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -301,7 +339,7 @@
         const ballTrail = [];
 
         // Raquettes
-        const paddle1 = {
+        const player1 = {
             x: 20,
             y: canvas.height / 2 - 60,
             width: 15,
@@ -310,7 +348,7 @@
             color: '#ff6b6b'
         };
 
-        const paddle2 = {
+        const player2 = {
             x: canvas.width - 35,
             y: canvas.height / 2 - 60,
             width: 15,
@@ -332,7 +370,7 @@
         };
 
         // Contrôles
-        const keys = {};
+        let keys = {};
         
         document.addEventListener('keydown', (e) => {
             keys[e.code] = true;
@@ -344,6 +382,25 @@
         document.addEventListener('keyup', (e) => {
             keys[e.code] = false;
         });
+
+        canvas.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            for (let i = 0; i < e.touches.length; i++) {
+                const touch = e.touches[i];
+                const rect = canvas.getBoundingClientRect();
+                if (touch.clientX < rect.left + rect.width / 2) {
+                    // Left side of the screen for Player 1
+                    player1.y = touch.clientY - rect.top - player1.height / 2;
+                    if (player1.y < 0) player1.y = 0;
+                    if (player1.y + player1.height > canvas.height) player1.y = canvas.height - player1.height;
+                } else {
+                    // Right side of the screen for Player 2
+                    player2.y = touch.clientY - rect.top - player2.height / 2;
+                    if (player2.y < 0) player2.y = 0;
+                    if (player2.y + player2.height > canvas.height) player2.y = canvas.height - player2.height;
+                }
+            }
+        }, { passive: false });
 
         // Fonctions audio
         function playSound(frequency, duration, type = 'sine', volume = 0.1) {
@@ -506,26 +563,26 @@
         // Dessiner les raquettes
         function drawPaddles() {
             // Raquette joueur 1
-            const gradient1 = ctx.createLinearGradient(paddle1.x, 0, paddle1.x + paddle1.width, 0);
-            gradient1.addColorStop(0, paddle1.color);
+            const gradient1 = ctx.createLinearGradient(player1.x, 0, player1.x + player1.width, 0);
+            gradient1.addColorStop(0, player1.color);
             gradient1.addColorStop(1, '#ff8e8e');
             
             ctx.fillStyle = gradient1;
-            ctx.fillRect(paddle1.x, paddle1.y, paddle1.width, paddle1.height);
+            ctx.fillRect(player1.x, player1.y, player1.width, player1.height);
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = 2;
-            ctx.strokeRect(paddle1.x, paddle1.y, paddle1.width, paddle1.height);
+            ctx.strokeRect(player1.x, player1.y, player1.width, player1.height);
             
             // Raquette joueur 2
-            const gradient2 = ctx.createLinearGradient(paddle2.x, 0, paddle2.x + paddle2.width, 0);
+            const gradient2 = ctx.createLinearGradient(player2.x, 0, player2.x + player2.width, 0);
             gradient2.addColorStop(0, '#7ed7d1');
-            gradient2.addColorStop(1, paddle2.color);
+            gradient2.addColorStop(1, player2.color);
             
             ctx.fillStyle = gradient2;
-            ctx.fillRect(paddle2.x, paddle2.y, paddle2.width, paddle2.height);
+            ctx.fillRect(player2.x, player2.y, player2.width, player2.height);
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = 2;
-            ctx.strokeRect(paddle2.x, paddle2.y, paddle2.width, paddle2.height);
+            ctx.strokeRect(player2.x, player2.y, player2.width, player2.height);
         }
 
         // Dessiner la balle
@@ -565,19 +622,19 @@
         // Mettre à jour les raquettes
         function updatePaddles() {
             // Joueur 1 (W/S)
-            if (keys['KeyW'] && paddle1.y > 0) {
-                paddle1.y -= paddle1.speed;
+            if (keys['KeyW'] && player1.y > 0) {
+                player1.y -= player1.speed;
             }
-            if (keys['KeyS'] && paddle1.y < canvas.height - paddle1.height) {
-                paddle1.y += paddle1.speed;
+            if (keys['KeyS'] && player1.y < canvas.height - player1.height) {
+                player1.y += player1.speed;
             }
             
             // Joueur 2 (Flèches)
-            if (keys['ArrowUp'] && paddle2.y > 0) {
-                paddle2.y -= paddle2.speed;
+            if (keys['ArrowUp'] && player2.y > 0) {
+                player2.y -= player2.speed;
             }
-            if (keys['ArrowDown'] && paddle2.y < canvas.height - paddle2.height) {
-                paddle2.y += paddle2.speed;
+            if (keys['ArrowDown'] && player2.y < canvas.height - player2.height) {
+                player2.y += player2.speed;
             }
         }
 
@@ -596,11 +653,11 @@
             }
 
             // Collision avec la raquette du joueur 1
-            if (ball.x - ball.radius < paddle1.x + paddle1.width &&
-                ball.y > paddle1.y && ball.y < paddle1.y + paddle1.height &&
+            if (ball.x - ball.radius < player1.x + player1.width &&
+                ball.y > player1.y && ball.y < player1.y + player1.height &&
                 ball.dx < 0) {
                 
-                const hitPos = (ball.y - paddle1.y) / paddle1.height;
+                const hitPos = (ball.y - player1.y) / player1.height;
                 const angle = (hitPos - 0.5) * Math.PI / 3;
                 
                 const speed = Math.min(Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy) + 0.5, ball.maxSpeed);
@@ -610,15 +667,15 @@
                 if (ball.dx < 0) ball.dx = -ball.dx;
                 
                 playSound(600, 0.15, 'square');
-                createParticles(ball.x, ball.y, paddle1.color, 8);
+                createParticles(ball.x, ball.y, player1.color, 8);
             }
 
             // Collision avec la raquette du joueur 2
-            if (ball.x + ball.radius > paddle2.x &&
-                ball.y > paddle2.y && ball.y < paddle2.y + paddle2.height &&
+            if (ball.x + ball.radius > player2.x &&
+                ball.y > player2.y && ball.y < player2.y + player2.height &&
                 ball.dx > 0) {
                 
-                const hitPos = (ball.y - paddle2.y) / paddle2.height;
+                const hitPos = (ball.y - player2.y) / player2.height;
                 const angle = (hitPos - 0.5) * Math.PI / 3;
                 
                 const speed = Math.min(Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy) + 0.5, ball.maxSpeed);
@@ -628,7 +685,7 @@
                 if (ball.dx > 0) ball.dx = -ball.dx;
                 
                 playSound(600, 0.15, 'square');
-                createParticles(ball.x, ball.y, paddle2.color, 8);
+                createParticles(ball.x, ball.y, player2.color, 8);
             }
 
             // Point marqué
@@ -636,7 +693,7 @@
                 player2Score++;
                 player2ScoreElement.textContent = player2Score;
                 playSound(300, 0.5, 'sawtooth');
-                createParticles(canvas.width / 2, canvas.height / 2, paddle2.color, 15);
+                createParticles(canvas.width / 2, canvas.height / 2, player2.color, 15);
                 
                 if (player2Score >= winningScore) {
                     endGame('Joueur 2');
@@ -649,7 +706,7 @@
                 player1Score++;
                 player1ScoreElement.textContent = player1Score;
                 playSound(300, 0.5, 'sawtooth');
-                createParticles(canvas.width / 2, canvas.height / 2, paddle1.color, 15);
+                createParticles(canvas.width / 2, canvas.height / 2, player1.color, 15);
                 
                 if (player1Score >= winningScore) {
                     endGame('Joueur 1');
@@ -675,7 +732,7 @@
                     createParticles(
                         Math.random() * canvas.width,
                         Math.random() * canvas.height,
-                        winner === 'Joueur 1' ? paddle1.color : paddle2.color,
+                        winner === 'Joueur 1' ? player1.color : player2.color,
                         3
                     );
                 }, i * 100);
@@ -709,7 +766,7 @@
                 
                 ctx.font = '16px Courier New';
                 ctx.fillStyle = '#ffffff';
-                ctx.fillText('Premier à 7 points gagne!', canvas.width / 2, canvas.height / 2 + 40);
+                ctx.fillText('Premier à 10 points gagne!', canvas.width / 2, canvas.height / 2 + 40);
             }
         }
 
@@ -752,8 +809,8 @@
             ballTrail.length = 0;
             
             // Remettre les raquettes au centre
-            paddle1.y = canvas.height / 2 - paddle1.height / 2;
-            paddle2.y = canvas.height / 2 - paddle2.height / 2;
+            player1.y = canvas.height / 2 - player1.height / 2;
+            player2.y = canvas.height / 2 - player2.height / 2;
             
             // Remettre la balle au centre
             ball.x = canvas.width / 2;
