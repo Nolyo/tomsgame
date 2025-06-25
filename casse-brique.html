@@ -274,6 +274,12 @@
                 font-size: 10px;
             }
         }
+
+        .version {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
@@ -314,6 +320,7 @@
             Utilisez les flèches ← → ou A/D pour déplacer la raquette<br>
             Récupérez les power-ups colorés qui tombent des briques !
         </div>
+        <div class="version">v1.1.2</div>
         
         <div class="game-over" id="gameOver">
             <h2 id="gameOverTitle">Game Over!</h2>
@@ -353,9 +360,16 @@
 
         function updatePaddlePosition(x) {
             let rect = canvas.getBoundingClientRect();
-            paddle.x = x - rect.left;
-            if (paddle.x < 0) paddle.x = 0;
-            if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+            // Le centre de la raquette suit le doigt
+            paddle.x = (x - rect.left) - paddle.width / 2;
+            
+            // Limiter la position de la raquette à l'intérieur du canvas
+            if (paddle.x < 0) {
+                paddle.x = 0;
+            }
+            if (paddle.x + paddle.width > canvas.width) {
+                paddle.x = canvas.width - paddle.width;
+            }
         }
 
         document.addEventListener('keydown', (e) => keys[e.code] = true);
