@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Arcade Rétro - Menu Principal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #0f0f23 50%, #1a1a2e 75%, #16213e 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .menu-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 800px;
+            width: 90%;
+        }
+
+        .title {
+            font-size: 3.5em;
+            color: #fff;
+            text-shadow: 
+                0 0 20px #00ff88,
+                0 0 40px #00ff88,
+                0 0 60px #00ff88;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { 
+                text-shadow: 
+                    0 0 20px #00ff88,
+                    0 0 40px #00ff88,
+                    0 0 60px #00ff88;
+            }
+            to { 
+                text-shadow: 
+                    0 0 30px #00ff88,
+                    0 0 60px #00ff88,
+                    0 0 90px #00ff88;
+            }
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #ffd700;
+            margin-bottom: 40px;
+            text-shadow: 0 0 10px #ffd700;
+            letter-spacing: 2px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .game-card:hover::before {
+            left: 100%;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: #00ff88;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.3),
+                0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .game-card.casse-brique:hover {
+            border-color: #ff6b6b;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.3),
+                0 0 30px rgba(255, 107, 107, 0.3);
+        }
+
+        .game-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+            display: block;
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+
+        .game-title {
+            font-size: 1.8em;
+            color: #fff;
+            margin-bottom: 10px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .game-description {
+            color: #ccc;
+            font-size: 0.95em;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .game-features {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .game-features li {
+            color: #aaa;
+            font-size: 0.85em;
+            margin: 5px 0;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .game-features li::before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: #00ff88;
+        }
+
+        .casse-brique .game-features li::before {
+            color: #ff6b6b;
+        }
+
+        .play-button {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            color: #0a0a1a;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+        }
+
+        .casse-brique .play-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .play-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5em;
+            color: #00ff88;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .stat-label {
+            color: #ccc;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .version {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            color: #666;
+            font-size: 0.7em;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5em;
+            }
+            
+            .menu-container {
+                padding: 25px;
+                margin: 20px;
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .game-card {
+                padding: 20px;
+            }
+        }
+
+        .sound-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .sound-toggle:hover {
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .credits {
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 4px solid #00ff88;
+        }
+
+        .credits h3 {
+            color: #00ff88;
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+
+        .credits p {
+            color: #ccc;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-particles" id="particles"></div>
+    <div class="sound-toggle" onclick="toggleSound()" id="soundToggle">🔊</div>
+    
+    <div class="menu-container">
+        <h1 class="title">🎮 ARCADE RÉTRO</h1>
+        <p class="subtitle">Choisissez votre aventure gaming</p>
+        
+        <div class="games-grid">
+            <!-- Casse-Briques -->
+            <div class="game-card casse-brique" onclick="playGame('casse-brique.html')">
+                <span class="game-icon">🧱</span>
+                <h2 class="game-title">Casse-Briques</h2>
+                <p class="game-description">
+                    Un classique revisité avec des effets modernes ! Détruisez toutes les briques avec votre balle rebondissante.
+                </p>
+                <ul class="game-features">
+                    <li>Power-ups magiques</li>
+                    <li>Effets de particules</li>
+                    <li>Système de combo</li>
+                    <li>Sons immersifs</li>
+                    <li>6 niveaux de briques</li>
+                </ul>
+                <button class="play-button">🚀 Jouer Solo</button>
+            </div>
+            
+            <!-- Pong 2 Joueurs -->
+            <div class="game-card pong" onclick="playGame('pong-2-joueurs.html')">
+                <span class="game-icon">🏓</span>
+                <h2 class="game-title">Pong Néon</h2>
+                <p class="game-description">
+                    Le ping-pong légendaire dans un style cyberpunk ! Affrontez un ami dans ce duel épique.
+                </p>
+                <ul class="game-features">
+                    <li>Mode 2 joueurs local</li>
+                    <li>Design cyberpunk</li>
+                    <li>Traînées lumineuses</li>
+                    <li>Vitesse progressive</li>
+                    <li>Premier à 7 points</li>
+                </ul>
+                <button class="play-button">⚔️ Duel à 2</button>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number">2</div>
+                <div class="stat-label">Jeux Disponibles</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">Heures de Fun</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Rétro Style</div>
+            </div>
+        </div>
+        
+        <div class="credits">
+            <h3>🎯 Instructions</h3>
+            <p>
+                Cliquez sur une carte de jeu pour commencer à jouer ! 
+                Chaque jeu a ses propres contrôles expliqués dans l'interface.
+                Utilisez le bouton son pour activer/désactiver les effets audio.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>Créé avec ❤️ pour le plaisir du gaming rétro</p>
+        </div>
+    </div>
+    
+    <div class="version">v1.0</div>
+
+    <script>
+        let soundEnabled = true;
+        
+        // Système audio pour les effets du menu
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(frequency, duration, type = 'sine', volume = 0.1) {
+            if (!soundEnabled) return;
+            
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+                
+                gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch (e) {
+                console.log('Audio not available');
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
+            
+            if (soundEnabled) {
+                playSound(800, 0.2, 'square');
+            }
+        }
+
+        function playGame(gameFile) {
+            playSound(600, 0.3, 'square');
+            
+            // Effet de transition
+            document.body.style.transition = 'opacity 0.5s ease';
+            document.body.style.opacity = '0.3';
+            
+            setTimeout(() => {
+                window.location.href = gameFile;
+            }, 300);
+        }
+
+        // Création des particules flottantes
+        function createFloatingParticles() {
+            const particlesContainer = document.getElementById('particles');
+            
+            setInterval(() => {
+                if (document.querySelectorAll('.particle').length < 15) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDelay = Math.random() * 2 + 's';
+                    particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                    
+                    // Couleurs aléatoires
+                    const colors = ['#00ff88', '#ff6b6b', '#4ecdc4', '#ffd700', '#ffffff'];
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    particlesContainer.appendChild(particle);
+                    
+                    // Supprimer la particule après l'animation
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 8000);
+                }
+            }, 500);
+        }
+
+        // Effets sonores au survol des cartes
+        document.querySelectorAll('.game-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                playSound(400, 0.1, 'triangle');
+            });
+            
+            card.addEventListener('click', () => {
+                playSound(800, 0.2, 'square');
+            });
+        });
+
+        // Animation d'entrée
+        window.addEventListener('load', () => {
+            document.querySelector('.menu-container').style.opacity = '0';
+            document.querySelector('.menu-container').style.transform = 'translateY(50px)';
+            document.querySelector('.menu-container').style.transition = 'all 1s ease';
+            
+            setTimeout(() => {
+                document.querySelector('.menu-container').style.opacity = '1';
+                document.querySelector('.menu-container').style.transform = 'translateY(0)';
+                playSound(440, 0.5, 'sine');
+            }, 100);
+            
+            createFloatingParticles();
+        });
+
+        // Easter egg - Konami Code
+        let konamiCode = [];
+        const konami = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65]; // ↑↑↓↓←→←→BA
+        
+        document.addEventListener('keydown', (e) => {
+            konamiCode.push(e.keyCode);
+            if (konamiCode.length > konami.length) {
+                konamiCode.shift();
+            }
+            
+            if (konamiCode.length === konami.length && 
+                konamiCode.every((code, index) => code === konami[index])) {
+                
+                // Easter egg activé !
+                document.body.style.animation = 'none';
+                document.body.style.background = 'linear-gradient(45deg, #ff0000, #00ff00, #0000ff, #ffff00, #ff00ff, #00ffff)';
+                document.body.style.backgroundSize = '400% 400%';
+                document.body.style.animation = 'gradientShift 0.5s ease infinite';
+                
+                playSound(1000, 1, 'square', 0.2);
+                
+                setTimeout(() => {
+                    location.reload();
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html> 
