@@ -346,6 +346,9 @@
         let combo = 0;
         let gameRunning = true;
 
+        let lastTime = 0;
+        let deltaTime = 0;
+
         const keys = {};
 
         function updatePaddlePosition(x) {
@@ -377,7 +380,10 @@
         const powerUps = [];
         const activePowerupEffects = [];
         let paddleWidth = 120;
-        let ballSpeed = 4;
+        
+        // La vitesse est maintenant en pixels par seconde
+        const initialBallSpeed = 350; 
+        let ballSpeed = initialBallSpeed;
 
         // Raquette
         const paddle = {
@@ -385,7 +391,7 @@
             y: canvas.height - 30,
             width: paddleWidth,
             height: 15,
-            speed: 8
+            speed: 500 // pixels par seconde
         };
 
         // Balle
@@ -512,7 +518,7 @@
 
         function updateActivePowerups() {
             for (let i = activePowerupEffects.length - 1; i >= 0; i--) {
-                activePowerupEffects[i].timeLeft--;
+                activePowerupEffects[i].timeLeft -= deltaTime;
                 
                 if (activePowerupEffects[i].timeLeft <= 0) {
                     const effect = activePowerupEffects[i];
@@ -594,7 +600,7 @@
         function updatePowerUps() {
             for (let i = powerUps.length - 1; i >= 0; i--) {
                 const powerUp = powerUps[i];
-                powerUp.y += powerUp.dy;
+                powerUp.y += powerUp.dy * deltaTime * 60; // Normalisé à 60 FPS
                 powerUp.life--;
                 
                 // Collision avec la raquette
@@ -659,7 +665,7 @@
                         type: 'expand',
                         emoji: '📏',
                         name: 'Raquette élargie',
-                        timeLeft: 600, // 10 secondes à 60fps
+                        timeLeft: 10, // 10 secondes
                         onEnd: () => {
                             paddleWidth = Math.max(paddleWidth - 30, 80);
                             paddle.width = paddleWidth;
@@ -700,7 +706,7 @@
                         type: 'slow',
                         emoji: '🐌',
                         name: 'Balle ralentie',
-                        timeLeft: 480, // 8 secondes à 60fps
+                        timeLeft: 8, // 8 secondes
                         onEnd: () => {
                             ballSpeed = oldSpeed;
                             const direction = ball.dx > 0 ? 1 : -1;
@@ -833,17 +839,17 @@
         // Mettre à jour la position de la raquette
         function updatePaddle() {
             if ((keys['ArrowLeft'] || keys['KeyA']) && paddle.x > 0) {
-                paddle.x -= paddle.speed;
+                paddle.x -= paddle.speed * deltaTime;
             }
             if ((keys['ArrowRight'] || keys['KeyD']) && paddle.x < canvas.width - paddle.width) {
-                paddle.x += paddle.speed;
+                paddle.x += paddle.speed * deltaTime;
             }
         }
 
         // Mettre à jour la position de la balle
         function updateBall() {
-            ball.x += ball.dx;
-            ball.y += ball.dy;
+            ball.x += ball.dx * deltaTime;
+            ball.y += ball.dy * deltaTime;
 
             // Collision avec les murs
             if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
@@ -928,7 +934,14 @@
         }
 
         // Boucle principale du jeu
-        function gameLoop() {
+        function gameLoop(currentTime) {
+            deltaTime = (currentTime - lastTime) / 1000;
+            lastTime = currentTime;
+
+            if (isNaN(deltaTime)) {
+                deltaTime = 0;
+            }
+
             if (gameRunning) {
                 updatePaddle();
                 updateBall();
@@ -951,7 +964,7 @@
             combo = 0;
             gameRunning = true;
             paddleWidth = 120;
-            ballSpeed = 4;
+            ballSpeed = initialBallSpeed;
             
             scoreElement.textContent = score;
             livesElement.textContent = lives;
@@ -989,7 +1002,7 @@
 
         // Initialiser et démarrer le jeu
         initBricks();
-        gameLoop();
+        requestAnimationFrame(gameLoop);
     </script>
 </body>
 </html> 
