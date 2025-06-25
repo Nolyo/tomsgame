@@ -388,6 +388,7 @@
         let soundEnabled = true;
         let combo = 0;
         let gameRunning = true;
+        let ballLaunched = false;
 
         let lastTime = 0;
         let deltaTime = 0;
@@ -412,6 +413,16 @@
         document.addEventListener('keyup', (e) => keys[e.code] = false);
         document.addEventListener('mousemove', (e) => updatePaddlePosition(e.clientX));
         
+        // Lancer la balle au clic
+        canvas.addEventListener('click', () => {
+            if (!ballLaunched) {
+                ballLaunched = true;
+                ball.dx = ballSpeed * (Math.random() > 0.5 ? 1 : -1);
+                ball.dy = -ballSpeed;
+                playSound(523, 0.2, 'sine'); // C5 note
+            }
+        });
+
         // Nouveaux contrôles via boutons
         leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowLeft'] = true; });
         leftBtn.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowLeft'] = false; });
@@ -455,8 +466,8 @@
             x: canvas.width / 2,
             y: canvas.height / 2,
             radius: 8,
-            dx: ballSpeed,
-            dy: -ballSpeed,
+            dx: 0,
+            dy: 0,
             speed: ballSpeed
         };
 
@@ -926,7 +937,9 @@
                 const hitPos = (ball.x - paddle.x) / paddle.width;
                 const angle = (hitPos - 0.5) * Math.PI / 3; // Angle entre -60° et 60°
                 
-                const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+                let speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+                speed = Math.max(speed, ballSpeed); // Empêche la balle de trop ralentir
+
                 ball.dx = speed * Math.sin(angle);
                 ball.dy = -speed * Math.cos(angle);
                 
@@ -953,11 +966,7 @@
                     finalScoreElement.textContent = `Score final: ${score}`;
                     gameOverDiv.style.display = 'block';
                 } else {
-                    // Remettre la balle au centre
-                    ball.x = canvas.width / 2;
-                    ball.y = canvas.height / 2;
-                    ball.dx = ballSpeed * (Math.random() > 0.5 ? 1 : -1);
-                    ball.dy = -ballSpeed;
+                    resetBallAndPaddle();
                 }
             }
         }
@@ -1000,7 +1009,15 @@
 
             if (gameRunning) {
                 updatePaddle();
-                updateBall();
+
+                if (ballLaunched) {
+                    updateBall();
+                } else {
+                    // La balle suit la raquette si non lancée
+                    ball.x = paddle.x + paddle.width / 2;
+                    ball.y = paddle.y - ball.radius;
+                }
+
                 collisionDetection();
                 updateParticles();
                 updatePowerUps();
@@ -1034,15 +1051,7 @@
             powerUps.length = 0;
             activePowerupEffects.length = 0;
             
-            // Remettre la balle au centre
-            ball.x = canvas.width / 2;
-            ball.y = canvas.height / 2;
-            ball.dx = ballSpeed * (Math.random() > 0.5 ? 1 : -1);
-            ball.dy = -ballSpeed;
-            
-            // Remettre la raquette au centre
-            paddle.width = paddleWidth;
-            paddle.x = canvas.width / 2 - paddle.width / 2;
+            resetBallAndPaddle();
             
             // Réinitialiser les briques
             initBricks();
@@ -1052,12 +1061,23 @@
             
             // Message de bienvenue
             setTimeout(() => {
-                showNotification('🎮 Nouvelle partie! Bonne chance!', '#667eea');
+                showNotification('🎮 Cliquez pour lancer! Bonne chance!', '#667eea');
             }, 500);
+        }
+
+        function resetBallAndPaddle() {
+            ballLaunched = false;
+            paddle.width = paddleWidth;
+            paddle.x = canvas.width / 2 - paddle.width / 2;
+            ball.dx = 0;
+            ball.dy = 0;
+            ball.y = paddle.y - ball.radius;
+            ball.x = paddle.x + paddle.width / 2;
         }
 
         // Initialiser et démarrer le jeu
         initBricks();
+        resetBallAndPaddle();
         requestAnimationFrame(gameLoop);
     </script>
 </body>
